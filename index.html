@@ -129,7 +129,7 @@
       font-family: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
       letter-spacing: -0.02em;
       line-height: 1.12;
-      margin: 0;
+      margin: 0 0 8px;
     }
 
     h1 {
@@ -153,7 +153,7 @@
     .stack {
       display: grid;
       gap: var(--space-1);
-      margin-top: var(--space-2);
+      margin-top: var(--space-1);
     }
 
     .action-row {
@@ -625,7 +625,10 @@
   <div class="grain"></div>
   <div class="page-wipe" id="pageWipe"></div>
   <div class="confetti-layer" id="confettiLayer"></div>
-  <audio id="finalSong" src="assets/media/final-voice.ogg" preload="auto" playsinline></audio>
+  <audio id="finalSong" preload="auto" playsinline>
+    <source src="assets/media/final-voice.ogg" type="audio/ogg">
+    <source src="assets/media/final-song.mp3" type="audio/mpeg">
+  </audio>
 
   <main>
     <section class="panel visible inview" id="hook">
@@ -917,10 +920,19 @@
     const openVideoModal = () => {
       videoModal.classList.add("show");
       videoModal.setAttribute("aria-hidden", "false");
+      popupVideo.muted = true;
       popupVideo.currentTime = 0;
       popupVideo.play().catch(() => {});
       finalSong.currentTime = 0;
-      finalSong.play().catch(() => {});
+      const playPromise = finalSong.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise.catch(() => {
+          finalSong.load();
+          setTimeout(() => {
+            finalSong.play().catch(() => {});
+          }, 120);
+        });
+      }
       videoCloseBtn.focus();
     };
 
