@@ -920,7 +920,7 @@
     const openVideoModal = () => {
       videoModal.classList.add("show");
       videoModal.setAttribute("aria-hidden", "false");
-      popupVideo.muted = true;
+      popupVideo.muted = false;
       popupVideo.currentTime = 0;
       popupVideo.play().catch(() => {});
       finalSong.currentTime = 0;
