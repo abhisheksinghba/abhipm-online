@@ -1,3 +1,0 @@
-# Block direct web access to hidden private assets folder
-RewriteEngine On
-RewriteRule ^\.private_assets/ - [F,L]

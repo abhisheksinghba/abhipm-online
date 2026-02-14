@@ -405,20 +405,32 @@
       z-index: 2;
       display: none;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.32);
-      background: rgba(22, 19, 22, 0.9);
-      color: #f6f1ec;
-      padding: 10px 14px;
-      font-size: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      background: linear-gradient(135deg, rgba(204, 83, 111, 0.92), rgba(131, 49, 68, 0.92));
+      color: #fff7f4;
+      padding: 11px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
       cursor: pointer;
-      backdrop-filter: blur(6px);
-      margin: 8px auto 0;
+      backdrop-filter: blur(8px);
+      margin: 10px auto 0;
+      box-shadow: 0 12px 28px rgba(112, 39, 58, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+
+    .audio-unlock:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(112, 39, 58, 0.4);
+      filter: saturate(1.08);
     }
 
     .audio-unlock.show {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .video-modal {
@@ -613,7 +625,7 @@
   <div class="grain"></div>
   <div class="page-wipe" id="pageWipe"></div>
   <div class="confetti-layer" id="confettiLayer"></div>
-  <audio id="finalSong" src=".private_assets/final-voice.ogg" preload="auto" playsinline></audio>
+  <audio id="finalSong" src="assets/media/final-voice.ogg" preload="auto" playsinline></audio>
 
   <main>
     <section class="panel visible inview" id="hook">
@@ -641,7 +653,7 @@
     <section class="panel" id="memory">
       <h2>Do you remember this?</h2>
       <div class="memory-media">
-        <img src=".private_assets/memory.jpg" alt="A heart shape made with hands against the sky.">
+        <img src="assets/media/memory.jpg" alt="A heart shape made with hands against the sky.">
         <div class="caption">This was the day I realised you weren’t just “someone I liked”. You were someone I didn’t want to lose.</div>
       </div>
       <div class="memory-card">
@@ -705,7 +717,7 @@
       </div>
       <div class="wait-line" id="waitLine"></div>
       <div class="final" id="finalMessage" aria-live="polite"></div>
-      <button id="audioUnlockBtn" class="audio-unlock" type="button">Tap to play</button>
+      <button id="audioUnlockBtn" class="audio-unlock" type="button">Tap to play message</button>
     </section>
 
     <div class="reset-line">
@@ -716,7 +728,7 @@
   <div class="video-modal" id="videoModal" aria-hidden="true">
     <div class="video-card" role="dialog" aria-modal="true" aria-label="Memory video">
       <button id="videoCloseBtn" class="video-close" type="button" aria-label="Close video">×</button>
-      <video id="popupVideo" src=".private_assets/final-video.mov" controls playsinline preload="metadata"></video>
+      <video id="popupVideo" src="assets/media/final-video.mov" controls playsinline preload="metadata"></video>
     </div>
   </div>
 
