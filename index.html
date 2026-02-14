@@ -1,9 +1,1196 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Abhipm Online</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For You</title>
+  <style>
+    :root {
+      --bg: #f4efe7;
+      --ink: #1d1917;
+      --muted: #635851;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-strong: rgba(255, 255, 255, 0.96);
+      --line: rgba(29, 25, 23, 0.12);
+      --accent: #a73f55;
+      --accent-2: #7a2f42;
+      --accent-soft: #f7e6eb;
+      --gold: #b89a67;
+      --deep: #111112;
+      --ok: #1e7f58;
+      --shadow: 0 26px 68px rgba(22, 17, 15, 0.12);
+      --content-w: min(920px, 100% - 28px);
+      --space-1: clamp(10px, 1.6vw, 14px);
+      --space-2: clamp(14px, 2.4vw, 18px);
+      --space-3: clamp(18px, 3.2vw, 24px);
+      --space-4: clamp(22px, 4vw, 38px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--ink);
+      overflow-x: hidden;
+      background: radial-gradient(1200px 500px at 20% -8%, #fff9f3 0, transparent 60%),
+        radial-gradient(900px 460px at 94% 10%, #f4e2e7 0, transparent 58%),
+        linear-gradient(170deg, #f4efe7, #ebe4d8);
+      font-family: "Avenir Next", "Neue Haas Grotesk Text Pro", "Segoe UI", sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.06;
+      background-image: radial-gradient(#000 0.4px, transparent 0.4px);
+      background-size: 3px 3px;
+      z-index: 0;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      width: var(--content-w);
+      margin: clamp(14px, 2.8vw, 24px) auto 110px;
+      display: grid;
+      gap: var(--space-3);
+      scroll-snap-type: y proximity;
+    }
+
+    .panel {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: var(--space-4);
+      backdrop-filter: blur(10px);
+      transform: translateY(14px);
+      opacity: 0;
+      filter: blur(6px);
+      clip-path: inset(0 0 8% 0 round 28px);
+      transition: opacity 0.8s ease, transform 0.8s ease, filter 0.8s ease, clip-path 0.8s ease, box-shadow 0.45s ease;
+      pointer-events: none;
+      display: none;
+      min-height: min(78vh, 740px);
+      justify-content: center;
+      scroll-snap-align: start;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      top: 14px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(184, 154, 103, 0.5), transparent);
+      pointer-events: none;
+    }
+
+    .panel.visible {
+      display: block;
+      pointer-events: auto;
+    }
+
+    .panel.inview {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+      clip-path: inset(0 0 0 0 round 28px);
+    }
+
+    .panel.active {
+      box-shadow: 0 30px 74px rgba(19, 14, 12, 0.17);
+      transform: translateY(0) scale(1);
+    }
+
+    .panel.inview:not(.active) {
+      transform: translateY(0) scale(0.988);
+    }
+
+    .eyebrow {
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      font-size: 10px;
+      font-weight: 700;
+      color: #7a6f69;
+      margin-bottom: 10px;
+    }
+
+    h1,
+    h2 {
+      font-family: "Iowan Old Style", "Baskerville", "Times New Roman", serif;
+      letter-spacing: -0.02em;
+      line-height: 1.12;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(30px, 6vw, 60px);
+      max-width: 12ch;
+    }
+
+    h2 {
+      font-size: clamp(26px, 4.8vw, 46px);
+      max-width: 16ch;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(15px, 2vw, 18px);
+      line-height: 1.62;
+      max-width: 55ch;
+    }
+
+    .stack {
+      display: grid;
+      gap: var(--space-1);
+      margin-top: var(--space-2);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      margin-top: var(--space-2);
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      min-height: 46px;
+      padding: 12px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: transform 0.2s ease, box-shadow 0.25s ease, opacity 0.2s ease, background-color 0.25s ease;
+      background: rgba(255, 255, 255, 0.88);
+      color: #2b2421;
+      border: 1px solid rgba(43, 36, 33, 0.14);
+      box-shadow: 0 6px 16px rgba(22, 17, 15, 0.08);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:focus-visible {
+      outline: 3px solid #1e1a17;
+      outline-offset: 2px;
+    }
+
+    button.clicked {
+      transform: translateY(0) scale(0.98);
+      box-shadow: inset 0 0 0 2px rgba(167, 63, 85, 0.45), 0 8px 18px rgba(28, 19, 17, 0.14);
+      background: var(--accent-soft);
+      border-color: rgba(167, 63, 85, 0.56);
+      color: #5d2231;
+    }
+
+    .primary {
+      color: #fff;
+      border: 0;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      box-shadow: 0 14px 30px rgba(122, 47, 66, 0.3);
+    }
+
+    .primary.clicked {
+      color: #fff;
+      background: linear-gradient(120deg, #8f3449, #6d2839);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.3), 0 11px 22px rgba(87, 33, 48, 0.35);
+    }
+
+    .micro {
+      font-size: 14px;
+      color: #8a7d76;
+      min-height: 24px;
+      text-align: center;
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      pointer-events: none;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      height: auto;
+      overflow: visible;
+    }
+
+    .memory-media {
+      margin-top: 14px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #1a1a1f;
+      box-shadow: 0 14px 30px rgba(16, 16, 18, 0.18);
+    }
+
+    .memory-media img {
+      width: 100%;
+      height: min(56vw, 420px);
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.86) contrast(1.05);
+    }
+
+    .caption {
+      padding: 14px 16px;
+      background: var(--panel-strong);
+      color: #4f4540;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .memory-card {
+      margin-top: 12px;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .q {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 15px;
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .q strong {
+      font-size: 18px;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .q.done {
+      border-color: rgba(30, 127, 88, 0.35);
+      box-shadow: inset 0 0 0 1px rgba(30, 127, 88, 0.2);
+    }
+
+    .feedback {
+      margin-top: 12px;
+      color: var(--ok);
+      font-weight: 700;
+      min-height: 24px;
+    }
+
+    .future-lines span {
+      display: block;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .future-lines.show span {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .future-lines.show span:nth-child(2) { transition-delay: 0.2s; }
+    .future-lines.show span:nth-child(3) { transition-delay: 0.4s; }
+    .future-lines.show span:nth-child(4) { transition-delay: 0.6s; }
+
+    .proposal {
+      background: linear-gradient(188deg, #141315, #1d1b20);
+      color: #f4f0eb;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .proposal p {
+      color: #d2cbc1;
+    }
+
+    .proposal .primary {
+      background: linear-gradient(120deg, #c34a66, #9f364f);
+    }
+
+    .proposal .primary.locked {
+      cursor: default;
+      transform: none;
+    }
+
+    .proposal .primary.selected-final {
+      opacity: 1;
+      background: linear-gradient(120deg, #d75473, #b63f5a);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.34), 0 12px 22px rgba(128, 44, 65, 0.34);
+    }
+
+    .proposal .primary.unselected-final {
+      opacity: 0.72;
+      background: transparent;
+      color: #d3cbc2;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      box-shadow: none;
+    }
+
+    .wait-line {
+      min-height: 24px;
+      color: #f1cad6;
+      font-weight: 700;
+      font-size: 14px;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .final {
+      margin-top: 6px;
+      font-size: clamp(19px, 3.3vw, 28px);
+      font-family: "Georgia", serif;
+      color: #fff;
+      min-height: 24px;
+      line-height: 1.35;
+      text-align: center;
+      width: 100%;
+    }
+
+    .reset-line {
+      margin-top: 10px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .reset-line.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .reset-btn {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: #c9c1b8;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+      padding: 2px 4px;
+      min-height: auto;
+      box-shadow: none;
+    }
+
+    .reset-btn:hover {
+      color: #f2e8db;
+      transform: none;
+    }
+
+    .audio-unlock {
+      position: relative;
+      z-index: 2;
+      display: none;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      background: rgba(22, 19, 22, 0.9);
+      color: #f6f1ec;
+      padding: 10px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      margin: 8px auto 0;
+    }
+
+    .audio-unlock.show {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 160;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 8, 10, 0.78);
+      padding: 14px;
+    }
+
+    .video-modal.show {
+      display: flex;
+    }
+
+    .video-card {
+      width: min(94vw, 760px);
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.42);
+      background: #000;
+    }
+
+    .video-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      min-height: 32px !important;
+      width: 32px !important;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.52);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 0;
+      line-height: 1;
+      font-size: 20px;
+      box-shadow: none;
+      z-index: 3;
+    }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 99;
+    }
+
+    .page-wipe {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 98;
+      opacity: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(167, 63, 85, 0.18), rgba(17, 17, 19, 0));
+    }
+
+    .page-wipe.play {
+      animation: wipePulse 560ms ease;
+    }
+
+    @keyframes wipePulse {
+      0% { opacity: 0; transform: scale(1.02); }
+      35% { opacity: 0.65; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.99); }
+    }
+
+    .piece {
+      width: 12px;
+      height: 18px;
+      position: absolute;
+      opacity: 0;
+      border-radius: 2px;
+      animation: confetti 1.45s ease-out forwards;
+    }
+
+    @keyframes confetti {
+      0% { opacity: 1; transform: translate(var(--x), -20px) rotate(0deg); }
+      100% { opacity: 0; transform: translate(calc(var(--x) + var(--dx)), var(--dy)) rotate(var(--spin)); }
+    }
+
+    .wobble:hover {
+      animation: wobble 0.45s ease;
+    }
+
+    @keyframes wobble {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+
+    @media (max-width: 900px) {
+      :root {
+        --content-w: min(980px, 100% - 20px);
+      }
+      .panel {
+        border-radius: 22px;
+        min-height: auto;
+        clip-path: none;
+      }
+      .panel::before {
+        left: 16px;
+        right: 16px;
+      }
+      .panel.inview {
+        clip-path: none;
+      }
+      .panel.inview:not(.active) {
+        transform: translateY(0) scale(1);
+      }
+      .memory-media img {
+        height: min(68vw, 400px);
+      }
+    }
+
+    @media (max-width: 560px) {
+      :root {
+        --content-w: min(980px, 100% - 12px);
+      }
+      .grain {
+        opacity: 0.08;
+      }
+      main {
+        margin-top: 10px;
+        margin-bottom: 86px;
+        gap: 12px;
+        scroll-snap-type: none;
+      }
+      .panel {
+        border-radius: 18px;
+        padding: 16px;
+        backdrop-filter: blur(3px);
+        filter: none;
+        transform: none;
+      }
+      .panel.active {
+        box-shadow: 0 22px 50px rgba(16, 16, 16, 0.18);
+      }
+      h1 {
+        font-size: clamp(28px, 8.8vw, 34px);
+      }
+      h2 {
+        font-size: clamp(24px, 7.6vw, 30px);
+      }
+      p {
+        font-size: 15px;
+      }
+      .eyebrow {
+        margin-bottom: 8px;
+      }
+      .action-row button { flex: 1 1 100%; }
+      button {
+        width: 100%;
+        min-height: 48px;
+        font-size: 15px;
+      }
+      .memory-media {
+        margin-top: 10px;
+        border-radius: 14px;
+      }
+      .memory-media img {
+        height: min(80vw, 300px);
+      }
+      .caption {
+        padding: 12px;
+      }
+      .q {
+        padding: 12px;
+      }
+      .q strong {
+        font-size: 16px;
+      }
+      .reset-btn {
+        font-size: 11px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello from Abhipm Online</h1>
+  <div class="grain"></div>
+  <div class="page-wipe" id="pageWipe"></div>
+  <div class="confetti-layer" id="confettiLayer"></div>
+  <audio id="finalSong" src=".private_assets/final-voice.ogg" preload="auto" playsinline></audio>
+
+  <main>
+    <section class="panel visible inview" id="hook">
+      <h1>Hey… I built something for you.</h1>
+      <div class="stack">
+        <p>Don’t worry. It’s not a long speech.<br>(Okay… maybe a little.)</p>
+      </div>
+      <div class="action-row">
+        <button class="primary" id="openBtn">Should I open it?</button>
+      </div>
+      <p class="micro reveal" id="hookReveal">I was hoping you’d say yes. Good choice.</p>
+    </section>
+
+    <section class="panel" id="emotion">
+      <h2>Before anything dramatic…<br>I just want to say this.</h2>
+      <div class="stack">
+        <p>You make my days softer.<br>You make my problems smaller.<br>And somehow… you make me want to be better.</p>
+      </div>
+      <div class="action-row reveal" id="smileWrap">
+        <button id="smileBtn">Are you smiling right now?</button>
+      </div>
+      <p class="micro" id="smileText"></p>
+    </section>
+
+    <section class="panel" id="memory">
+      <h2>Do you remember this?</h2>
+      <div class="memory-media">
+        <img src=".private_assets/memory.jpg" alt="A heart shape made with hands against the sky.">
+        <div class="caption">This was the day I realised you weren’t just “someone I liked”. You were someone I didn’t want to lose.</div>
+      </div>
+      <div class="memory-card">
+        <p>And this…<br>This is where I fell a little harder than I planned to.</p>
+      </div>
+      <div class="action-row">
+        <button id="knowBtn">Did you know this already?</button>
+      </div>
+      <p class="micro" id="knowText"></p>
+    </section>
+
+    <section class="panel" id="connection">
+      <h2>Quick question.</h2>
+
+      <article class="q" id="q1">
+        <strong>Do you make my life better?</strong>
+        <div class="action-row">
+          <button data-q="1">Yes</button>
+          <button data-q="1">Obviously yes</button>
+        </div>
+      </article>
+
+      <article class="q" id="q2">
+        <strong>Am I lucky to have you?</strong>
+        <div class="action-row">
+          <button data-q="2">Yes</button>
+          <button data-q="2">Extremely yes</button>
+        </div>
+      </article>
+
+      <article class="q" id="q3">
+        <strong>Are you secretly obsessed with me?</strong>
+        <div class="action-row">
+          <button class="wobble" data-q="3">Yes</button>
+          <button class="wobble" data-q="3">Yes but pretending not to</button>
+        </div>
+      </article>
+
+      <p class="feedback" id="connectionFeedback"></p>
+    </section>
+
+    <section class="panel" id="future">
+      <h2>When I think about tomorrow…</h2>
+      <div class="stack future-lines" id="futureLines">
+        <span>I don’t imagine perfect days.</span>
+        <span>I imagine ordinary ones — but with you in them.</span>
+        <span>That’s the difference.</span>
+        <span>I want more random laughs, more stupid arguments, more late-night talks, more “us”.</span>
+      </div>
+      <div class="action-row">
+        <button class="primary" id="finalStepBtn">One last question</button>
+      </div>
+    </section>
+
+    <section class="panel proposal" id="proposal">
+      <h2>So I have one last question.</h2>
+      <p class="reveal" id="finalQuestion">Will you be my Valentine?<br>(And maybe… my forever one?)</p>
+      <div class="action-row reveal" id="proposalActions">
+        <button class="primary" id="yes1">❤️ Yes</button>
+        <button class="primary" id="yes2">❤️ Obviously yes</button>
+      </div>
+      <div class="wait-line" id="waitLine"></div>
+      <div class="final" id="finalMessage" aria-live="polite"></div>
+      <button id="audioUnlockBtn" class="audio-unlock" type="button">Tap to play</button>
+    </section>
+
+    <div class="reset-line">
+      <button class="reset-btn" id="resetFlowBtn" type="button">Reset this page</button>
+    </div>
+  </main>
+
+  <div class="video-modal" id="videoModal" aria-hidden="true">
+    <div class="video-card" role="dialog" aria-modal="true" aria-label="Memory video">
+      <button id="videoCloseBtn" class="video-close" type="button" aria-label="Close video">×</button>
+      <video id="popupVideo" src=".private_assets/final-video.mov" controls playsinline preload="metadata"></video>
+    </div>
+  </div>
+
+  <script>
+    const panels = {
+      hook: document.getElementById("hook"),
+      emotion: document.getElementById("emotion"),
+      memory: document.getElementById("memory"),
+      connection: document.getElementById("connection"),
+      future: document.getElementById("future"),
+      proposal: document.getElementById("proposal")
+    };
+
+    const confettiLayer = document.getElementById("confettiLayer");
+    const pageWipe = document.getElementById("pageWipe");
+
+    const hookReveal = document.getElementById("hookReveal");
+    const openBtn = document.getElementById("openBtn");
+    const smileWrap = document.getElementById("smileWrap");
+    const smileBtn = document.getElementById("smileBtn");
+    const smileText = document.getElementById("smileText");
+    const knowBtn = document.getElementById("knowBtn");
+    const knowText = document.getElementById("knowText");
+    const futureLines = document.getElementById("futureLines");
+    const finalStepBtn = document.getElementById("finalStepBtn");
+    const finalQuestion = document.getElementById("finalQuestion");
+    const proposalActions = document.getElementById("proposalActions");
+    const waitLine = document.getElementById("waitLine");
+    const finalMessage = document.getElementById("finalMessage");
+    const resetFlowBtn = document.getElementById("resetFlowBtn");
+    const resetLine = document.querySelector(".reset-line");
+    const audioUnlockBtn = document.getElementById("audioUnlockBtn");
+    const videoModal = document.getElementById("videoModal");
+    const popupVideo = document.getElementById("popupVideo");
+    const videoCloseBtn = document.getElementById("videoCloseBtn");
+    const finalSong = document.getElementById("finalSong");
+
+    let proposalTimer = null;
+    let proposalClicked = false;
+    const answered = new Set();
+    const STORAGE_KEY = "valentine_flow_state_v1";
+    const DEFAULT_STATE = {
+      opened: false,
+      smiled: false,
+      knew: false,
+      answered: [],
+      qSelections: {},
+      feedback: "",
+      futureShown: false,
+      finalStepOpened: false,
+      waitLine: "",
+      proposalClicked: false,
+      proposalChoice: "",
+      finalMessage: ""
+    };
+    const state = { ...DEFAULT_STATE };
+
+    const saveState = () => {
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        // Ignore storage write failures.
+      }
+    };
+
+    const hydrateState = () => {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return;
+        Object.assign(state, parsed);
+        if (Array.isArray(parsed.answered)) {
+          parsed.answered.forEach((q) => answered.add(String(q)));
+        }
+      } catch (err) {
+        // Ignore malformed storage and continue with defaults.
+      }
+    };
+
+    const sanitizeState = () => {
+      const validQ = new Set(["1", "2", "3"]);
+      const validFinalChoice = new Set(["yes1", "yes2"]);
+
+      state.opened = Boolean(state.opened);
+      state.smiled = Boolean(state.smiled);
+      state.knew = Boolean(state.knew);
+      state.futureShown = Boolean(state.futureShown);
+      state.finalStepOpened = Boolean(state.finalStepOpened);
+      state.proposalClicked = Boolean(state.proposalClicked);
+      state.waitLine = typeof state.waitLine === "string" ? state.waitLine : "";
+      state.feedback = typeof state.feedback === "string" ? state.feedback : "";
+      state.finalMessage = typeof state.finalMessage === "string" ? state.finalMessage : "";
+
+      const answered = Array.isArray(state.answered) ? state.answered.map((q) => String(q)) : [];
+      state.answered = Array.from(new Set(answered.filter((q) => validQ.has(q))));
+      state.qSelections = state.qSelections && typeof state.qSelections === "object" ? state.qSelections : {};
+      Object.keys(state.qSelections).forEach((q) => {
+        if (!validQ.has(q)) delete state.qSelections[q];
+      });
+
+      if (!state.opened) {
+        Object.assign(state, { ...DEFAULT_STATE });
+        return;
+      }
+
+      if (!state.smiled) {
+        state.knew = false;
+      }
+      if (!state.knew) {
+        state.answered = [];
+        state.qSelections = {};
+        state.feedback = "";
+      }
+      if (state.answered.length < 3) {
+        state.futureShown = false;
+      }
+      if (!state.futureShown) {
+        state.finalStepOpened = false;
+      }
+      if (!state.finalStepOpened) {
+        state.waitLine = "";
+        state.proposalClicked = false;
+        state.proposalChoice = "";
+        state.finalMessage = "";
+      }
+
+      if (!validFinalChoice.has(state.proposalChoice)) {
+        state.proposalChoice = "";
+      }
+      if (state.proposalClicked && !state.proposalChoice) {
+        state.proposalChoice = "yes1";
+      }
+      if (state.proposalClicked && !state.finalMessage) {
+        state.finalMessage = "Happy Valentine's Day, my sunflower.";
+      }
+    };
+
+    const markClicked = (btn) => {
+      btn.classList.add("clicked");
+      btn.setAttribute("aria-pressed", "true");
+    };
+
+    const markExclusiveClicked = (btn) => {
+      const group = btn.closest(".action-row");
+      if (!group) {
+        markClicked(btn);
+        return;
+      }
+      group.querySelectorAll("button").forEach((b) => {
+        b.classList.remove("clicked");
+        b.setAttribute("aria-pressed", "false");
+      });
+      markClicked(btn);
+    };
+
+    const unlock = (name, smooth = true, animate = true) => {
+      const panel = panels[name];
+      if (!panel || panel.classList.contains("visible")) return;
+      if (animate) {
+        pageWipe.classList.remove("play");
+        requestAnimationFrame(() => pageWipe.classList.add("play"));
+      }
+      panel.classList.add("visible");
+      requestAnimationFrame(() => panel.classList.add("inview"));
+      if (smooth) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    const launchConfetti = () => {
+      confettiLayer.innerHTML = "";
+      const colors = ["#ec4a78", "#f26868", "#f6a958", "#f4df75", "#6ed0a2", "#78a5ff"];
+      for (let i = 0; i < 140; i++) {
+        const piece = document.createElement("span");
+        piece.className = "piece";
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.setProperty("--x", `${Math.random() * window.innerWidth}px`);
+        piece.style.setProperty("--dx", `${(Math.random() - 0.5) * 300}px`);
+        piece.style.setProperty("--dy", `${150 + Math.random() * (window.innerHeight * 0.65)}px`);
+        piece.style.setProperty("--spin", `${Math.random() * 900 - 450}deg`);
+        piece.style.animationDelay = `${Math.random() * 0.2}s`;
+        confettiLayer.appendChild(piece);
+      }
+      setTimeout(() => { confettiLayer.innerHTML = ""; }, 1800);
+    };
+
+    const openVideoModal = () => {
+      videoModal.classList.add("show");
+      videoModal.setAttribute("aria-hidden", "false");
+      popupVideo.currentTime = 0;
+      popupVideo.play().catch(() => {});
+      finalSong.currentTime = 0;
+      finalSong.play().catch(() => {});
+      videoCloseBtn.focus();
+    };
+
+    const closeVideoModal = () => {
+      videoModal.classList.remove("show");
+      videoModal.setAttribute("aria-hidden", "true");
+      popupVideo.pause();
+      finalSong.pause();
+      audioUnlockBtn.focus();
+    };
+
+    audioUnlockBtn.addEventListener("click", openVideoModal);
+    videoCloseBtn.addEventListener("click", closeVideoModal);
+    videoModal.addEventListener("click", (event) => {
+      if (event.target === videoModal) closeVideoModal();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && videoModal.classList.contains("show")) closeVideoModal();
+    });
+
+    openBtn.addEventListener("click", () => {
+      if (state.opened) return;
+      markClicked(openBtn);
+      hookReveal.classList.add("show");
+      state.opened = true;
+      saveState();
+      unlock("emotion");
+      setTimeout(() => smileWrap.classList.add("show"), 700);
+    });
+
+    smileBtn.addEventListener("click", () => {
+      if (!state.opened || state.smiled) return;
+      markClicked(smileBtn);
+      smileText.textContent = "I knew it. I can feel it from here.";
+      state.smiled = true;
+      saveState();
+      unlock("memory");
+      smileBtn.disabled = true;
+      smileBtn.style.opacity = "0.65";
+    });
+
+    knowBtn.addEventListener("click", () => {
+      if (!state.smiled || state.knew) return;
+      markClicked(knowBtn);
+      knowText.textContent = "Of course you did. You always act innocent after.";
+      state.knew = true;
+      saveState();
+      unlock("connection");
+      knowBtn.disabled = true;
+      knowBtn.style.opacity = "0.65";
+    });
+
+    document.querySelectorAll("#connection button[data-q]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (!state.knew) return;
+        const q = btn.getAttribute("data-q");
+        markExclusiveClicked(btn);
+        answered.add(q);
+        document.getElementById(`q${q}`).classList.add("done");
+
+        const feedback = document.getElementById("connectionFeedback");
+        if (q === "1") feedback.textContent = "That’s correct. You’re very smart.";
+        if (q === "2") feedback.textContent = "Finally, we agree on something important.";
+        if (q === "3") feedback.textContent = "Confirmed. Case closed.";
+        state.answered = Array.from(answered);
+        state.qSelections[q] = btn.textContent.trim();
+        state.feedback = feedback.textContent;
+        saveState();
+
+        if (answered.size === 3) {
+          state.futureShown = true;
+          saveState();
+          unlock("future");
+          setTimeout(() => futureLines.classList.add("show"), 380);
+        }
+      });
+    });
+
+    finalStepBtn.addEventListener("click", () => {
+      if (answered.size < 3) return;
+      markClicked(finalStepBtn);
+      state.finalStepOpened = true;
+      saveState();
+      unlock("proposal");
+      setTimeout(() => {
+        finalQuestion.classList.add("show");
+      }, 300);
+      setTimeout(() => {
+        proposalActions.classList.add("show");
+      }, 700);
+
+      clearTimeout(proposalTimer);
+      waitLine.textContent = "";
+      state.waitLine = "";
+      saveState();
+      proposalTimer = setTimeout(() => {
+        if (!proposalClicked) {
+          waitLine.textContent = "I’m going to assume that’s a yes.";
+          state.waitLine = waitLine.textContent;
+          saveState();
+        }
+      }, 5000);
+    });
+
+    const accept = (event) => {
+      if (!state.finalStepOpened) return;
+      markExclusiveClicked(event.currentTarget);
+      proposalClicked = true;
+      clearTimeout(proposalTimer);
+      waitLine.textContent = "";
+      finalMessage.textContent = "Happy Valentine's Day, my sunflower.";
+      launchConfetti();
+      const yes1 = document.getElementById("yes1");
+      const yes2 = document.getElementById("yes2");
+      const selectedBtn = event.currentTarget;
+      const otherBtn = selectedBtn.id === "yes1" ? yes2 : yes1;
+      [yes1, yes2].forEach((btn) => {
+        btn.disabled = true;
+        btn.classList.add("locked");
+      });
+      selectedBtn.classList.add("selected-final");
+      otherBtn.classList.add("unselected-final");
+      resetLine.classList.add("show");
+      audioUnlockBtn.classList.add("show");
+      state.proposalClicked = true;
+      state.proposalChoice = event.currentTarget.id;
+      state.finalMessage = finalMessage.textContent;
+      state.waitLine = "";
+      saveState();
+    };
+
+    document.getElementById("yes1").addEventListener("click", accept);
+    document.getElementById("yes2").addEventListener("click", accept);
+
+    resetFlowBtn.addEventListener("click", () => {
+      sessionStorage.removeItem(STORAGE_KEY);
+      const cleanUrl = window.location.pathname + window.location.search + window.location.hash;
+      window.location.assign(cleanUrl);
+    });
+
+    const restoreFromState = () => {
+      if (!state.opened) return;
+
+      markClicked(openBtn);
+      hookReveal.classList.add("show");
+      unlock("emotion", false, false);
+      smileWrap.classList.add("show");
+
+      if (state.smiled) {
+        markClicked(smileBtn);
+        smileText.textContent = "I knew it. I can feel it from here.";
+        smileBtn.disabled = true;
+        smileBtn.style.opacity = "0.65";
+        unlock("memory", false, false);
+      }
+
+      if (state.knew) {
+        markClicked(knowBtn);
+        knowText.textContent = "Of course you did. You always act innocent after.";
+        knowBtn.disabled = true;
+        knowBtn.style.opacity = "0.65";
+        unlock("connection", false, false);
+      }
+
+      if (state.answered.length) {
+        state.answered.forEach((q) => {
+          const qId = String(q);
+          answered.add(qId);
+          const question = document.getElementById(`q${qId}`);
+          if (question) question.classList.add("done");
+          const selectedLabel = state.qSelections[qId];
+          if (selectedLabel) {
+            const btn = Array.from(document.querySelectorAll(`#q${qId} button[data-q='${qId}']`))
+              .find((b) => b.textContent.trim() === selectedLabel);
+            if (btn) markExclusiveClicked(btn);
+          }
+        });
+      }
+
+      if (state.feedback) {
+        document.getElementById("connectionFeedback").textContent = state.feedback;
+      }
+
+      if (state.futureShown) {
+        unlock("future", false, false);
+        futureLines.classList.add("show");
+      }
+
+      if (state.finalStepOpened) {
+        markClicked(finalStepBtn);
+        unlock("proposal", false, false);
+        finalQuestion.classList.add("show");
+        proposalActions.classList.add("show");
+      }
+
+      if (state.waitLine && !state.proposalClicked) {
+        waitLine.textContent = state.waitLine;
+      }
+
+      if (state.proposalClicked) {
+        proposalClicked = true;
+        finalMessage.textContent = state.finalMessage || "Happy Valentine's Day, my sunflower.";
+        resetLine.classList.add("show");
+        audioUnlockBtn.classList.add("show");
+        const yes1 = document.getElementById("yes1");
+        const yes2 = document.getElementById("yes2");
+        const selected = document.getElementById(state.proposalChoice);
+        if (selected) markExclusiveClicked(selected);
+        [yes1, yes2].forEach((btn) => {
+          btn.disabled = true;
+          btn.classList.add("locked");
+          btn.classList.remove("selected-final", "unselected-final");
+        });
+        const other = state.proposalChoice === "yes1" ? yes2 : yes1;
+        if (selected) selected.classList.add("selected-final");
+        if (other) other.classList.add("unselected-final");
+      }
+    };
+
+    const forceLastScreenOnReload = () => {
+      const navEntry = performance.getEntriesByType("navigation")[0];
+      const isReload = navEntry && navEntry.type === "reload";
+      if (!isReload) return;
+
+      state.opened = true;
+      state.smiled = true;
+      state.knew = true;
+      state.answered = ["1", "2", "3"];
+      state.qSelections = { "1": "Yes", "2": "Yes", "3": "Yes" };
+      state.feedback = "Confirmed. Case closed.";
+      state.futureShown = true;
+      state.finalStepOpened = true;
+      state.waitLine = "";
+      state.proposalClicked = true;
+      if (!state.proposalChoice) state.proposalChoice = "yes1";
+      if (!state.finalMessage) state.finalMessage = "Happy Valentine's Day, my sunflower.";
+      saveState();
+
+      restoreFromState();
+      requestAnimationFrame(() => {
+        panels.proposal.scrollIntoView({ behavior: "smooth", block: "start" });
+        launchConfetti();
+        audioUnlockBtn.classList.add("show");
+      });
+    };
+
+    hydrateState();
+    sanitizeState();
+    saveState();
+    restoreFromState();
+    forceLastScreenOnReload();
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("inview");
+        }
+      });
+    }, { threshold: 0.15 });
+
+    const activeIo = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll(".panel.active").forEach((p) => p.classList.remove("active"));
+          entry.target.classList.add("active");
+        }
+      });
+    }, { threshold: 0.55 });
+
+    document.querySelectorAll(".panel.visible").forEach((panel) => io.observe(panel));
+    document.querySelectorAll(".panel.visible").forEach((panel) => activeIo.observe(panel));
+
+    const watchVisiblePanels = new MutationObserver(() => {
+      document.querySelectorAll(".panel.visible:not([data-observed])").forEach((panel) => {
+        panel.dataset.observed = "1";
+        io.observe(panel);
+        activeIo.observe(panel);
+      });
+    });
+
+    watchVisiblePanels.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
+
+  </script>
 </body>
 </html>

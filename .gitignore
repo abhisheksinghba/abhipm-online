@@ -1,0 +1,5 @@
+# Local command files
+commands.sh
+
+# Private local media (do not commit)
+.private_assets/
