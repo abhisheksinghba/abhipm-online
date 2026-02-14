@@ -19,3 +19,4 @@ jobs:
           script: |
             cd /var/www/abhipm-online
             git pull origin main
+git reset --hard origin/main
